@@ -111,20 +111,61 @@ def upload_file():
         # Load the uploaded file into a DataFrame
         try:
             df = pd.read_csv(file_path)
-            if df.empty:
-                return jsonify({"error": "Uploaded file is empty"}), 400
         except Exception as e:
             print(f"Error reading file: {e}")
             return jsonify({"error": f"Error reading file: {e}"}), 400
 
-        # Example: Use collaborative filtering for user_id = 1
-        user_id = 1
-        recommendations = recommend_books_collaborative(user_id, df)
+        # Step 1: Get book details from Google Books API
+        book_data = []
+        for book in df["book_title"]:
+            details = get_book_data(book)
+            if details:
+                book_data.append(details)
+            time.sleep(1) 
 
-        return jsonify({"message": "File uploaded successfully", "recommendations": recommendations})
+        books_df = pd.DataFrame(book_data)
+
+        # Step 2: Fetch additional books from Google Books API based on genre
+        extra_books = []
+        for genre in books_df["genre"].unique():
+            params = {
+                "q": f"subject:{genre}",  
+                "maxResults": 5,
+                "key": API_KEY
+            }
+            response = requests.get(API_URL, params=params)
+
+            if response.status_code == 200:
+                data = response.json()
+                if "items" in data:
+                    for item in data["items"]:
+                        volume_info = item.get("volumeInfo", {})
+                        extra_books.append({
+                            "title": volume_info.get("title", "Unknown Title"),
+                            "author": ", ".join(volume_info.get("authors", ["Unknown Author"])),
+                            "genre": ", ".join(volume_info.get("categories", ["Unknown Genre"])),
+                            "summary": volume_info.get("description", "No description available.")
+                        })
+
+            time.sleep(1)  # Avoid rate-limiting
+
+        extra_books_df = pd.DataFrame(extra_books)
+
+        # Step 3: Combine CSV books + Google Books API books
+        full_books_df = pd.concat([books_df, extra_books_df], ignore_index=True)
+
+        # Step 4: Get content-based recommendations
+        hybrid_recommendations = set()
+        for book in df["book_title"]:
+            content_recs = recommend_books_content(full_books_df, book)
+            hybrid_recommendations.update([rec[0] for rec in content_recs])
+
+        return jsonify({"message": "File uploaded successfully", "recommendations": list(hybrid_recommendations)})
+    
     except Exception as e:
         print(f"Internal server error: {e}")
         return jsonify({"error": f"Internal server error: {e}"}), 500
+
     
 if __name__ == "__main__":
     app.run(debug=True)
