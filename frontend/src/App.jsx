@@ -6,8 +6,8 @@ function App() {
   const [recommendations, setRecommendations] = useState([]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-5">
-      <h1 className="text-3xl font-bold mb-4">AI Book Recommender</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Book Assist</h1>
       <UploadForm setRecommendations={setRecommendations} />
       <Recommendations recommendations={recommendations} />
     </div>
@@ -15,3 +15,4 @@ function App() {
 }
 
 export default App;
+

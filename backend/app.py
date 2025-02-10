@@ -108,14 +108,12 @@ def upload_file():
         file_path = "user_preferences.csv"
         file.save(file_path)
 
-        # Load the uploaded file into a DataFrame
         try:
             df = pd.read_csv(file_path)
         except Exception as e:
             print(f"Error reading file: {e}")
             return jsonify({"error": f"Error reading file: {e}"}), 400
 
-        # Step 1: Get book details from Google Books API
         book_data = []
         for book in df["book_title"]:
             details = get_book_data(book)
@@ -125,7 +123,6 @@ def upload_file():
 
         books_df = pd.DataFrame(book_data)
 
-        # Step 2: Fetch additional books from Google Books API based on genre
         extra_books = []
         for genre in books_df["genre"].unique():
             params = {
@@ -147,14 +144,12 @@ def upload_file():
                             "summary": volume_info.get("description", "No description available.")
                         })
 
-            time.sleep(1)  # Avoid rate-limiting
+            time.sleep(1) 
 
         extra_books_df = pd.DataFrame(extra_books)
 
-        # Step 3: Combine CSV books + Google Books API books
         full_books_df = pd.concat([books_df, extra_books_df], ignore_index=True)
 
-        # Step 4: Get content-based recommendations
         hybrid_recommendations = set()
         for book in df["book_title"]:
             content_recs = recommend_books_content(full_books_df, book)
