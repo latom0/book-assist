@@ -1,0 +1,11 @@
+user_id,book_title,author,genre,rating
+1,"The Hobbit","J.R.R. Tolkien","Fantasy",5
+1,"1984","George Orwell","Dystopian",4
+1,"To Kill a Mockingbird","Harper Lee","Classic, Historical Fiction",5
+1,"Pride and Prejudice","Jane Austen","Romance, Classic",4
+1,"Harry Potter and the Sorcerer's Stone","J.K. Rowling","Fantasy, Adventure",5
+2,"The Catcher in the Rye","J.D. Salinger","Classic, Coming-of-Age",3
+2,"Brave New World","Aldous Huxley","Dystopian, Sci-Fi",4
+2,"Lord of the Flies","William Golding","Classic, Allegory",3
+2,"Fahrenheit 451","Ray Bradbury","Dystopian, Sci-Fi",4
+2,"The Great Gatsby","F. Scott Fitzgerald","Classic, Drama",5
