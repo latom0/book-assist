@@ -9,7 +9,7 @@ function UploadForm({ setRecommendations }) {
     e.preventDefault();
     if (!file) return;
 
-    setLoading(true);
+    setLoading(true); 
 
     const formData = new FormData();
     formData.append("file", file);
@@ -20,29 +20,44 @@ function UploadForm({ setRecommendations }) {
     } catch (error) {
       console.error("Error uploading file:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-6 mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4 text-center">Upload Your Book List</h2>
-      <form onSubmit={handleUpload} className="flex flex-col items-center space-y-4">
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          className="border border-gray-300 p-2 rounded w-full cursor-pointer"
-        />
-        <button
-          type="submit"
-          className={`px-4 py-2 rounded-lg text-white font-semibold transition ${
-            loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-          }`}
-          disabled={loading}
-        >
-          {loading ? "Uploading..." : "Get Recommendations"}
-        </button>
-      </form>
+    <div
+      className="flex flex-col items-center justify-center min-h-screen 
+                 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/bg.jpg')" }} // Change this to your actual image path
+    >
+      <div className="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl flex flex-col items-center space-y-6 w-96">
+        <h1 className="text-4xl font-bold text-white text-center drop-shadow-lg">
+          Upload Your Book List
+        </h1>
+
+        <form onSubmit={handleUpload} className="flex flex-col items-center space-y-4 w-full">
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="w-full text-sm text-gray-300 border border-gray-400 rounded-lg cursor-pointer bg-gray-800 focus:outline-none p-2"
+          />
+
+          {loading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-500"></div>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white 
+                         py-2 px-4 rounded-lg font-semibold shadow-md hover:scale-105 
+                         transform transition-all hover:shadow-xl"
+            >
+              Get Recommendations
+            </button>
+          )}
+        </form>
+      </div>
     </div>
   );
 }
