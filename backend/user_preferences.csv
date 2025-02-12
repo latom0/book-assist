@@ -1,11 +1,20 @@
-user_id,book_title,rating
-1,The Great Gatsby,5
-1,1984,4
-1,To Kill a Mockingbird,3
-1,The Catcher in the Rye,4
-1,Brave New World,5
-1,The Hobbit,4
-1,Harry Potter and the Sorcerer's Stone,5
-1,The Great Gatsby,3
-1,Moby Dick,2
-1,War and Peace,5
+book_title,rating
+"The Hobbit",5
+"1984",4
+"To Kill a Mockingbird",5
+"Pride and Prejudice",4
+"Harry Potter and the Sorcerer's Stone",5
+"The Catcher in the Rye",3
+"Brave New World",4
+"Lord of the Flies",3
+"Fahrenheit 451",4
+"The Great Gatsby",5
+"Ready Player Two",4
+"The Picture of Dorian Gray",2
+"Journey to the Center of the Earth", 5
+"The Silver Door", 3
+"Henry's Leg", 2
+"Future Shock", 4
+"Bag of Bones", 3
+"The Grizzly", 4
+"Rich Earth", 5

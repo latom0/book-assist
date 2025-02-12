@@ -21,6 +21,10 @@ API_KEY = os.getenv("GOOGLE_BOOKS_API_KEY")
 book_cache = {}
 
 def get_book_data(book_title):
+    """Fetch book details from Google Books API."""
+    if book_title in book_cache:
+        return book_cache[book_title]
+
     try:
         params = {
             "q": book_title, 
@@ -28,7 +32,7 @@ def get_book_data(book_title):
             "key": API_KEY  
         }
         response = requests.get(API_URL, params=params)
-        response.raise_for_status() 
+        response.raise_for_status()
 
         data = response.json()
         if "items" not in data:
@@ -44,12 +48,15 @@ def get_book_data(book_title):
             "summary": volume_info.get("description", "No description available.")
         }
 
+        book_cache[book_title] = book_details
         return book_details
+
     except requests.RequestException as e:
         print(f"Error fetching book data: {e}")
         return None
 
 def recommend_books_content(books_df, book_title):
+    """Generate content-based recommendations."""
     if book_title not in books_df["title"].values:
         return []
 
@@ -70,6 +77,7 @@ def recommend_books_content(books_df, book_title):
     return books_df.iloc[[i[0] for i in scores]][["title", "author", "genre"]].values.tolist()
 
 def recommend_books_collaborative(user_id, ratings_df):
+    """Generate collaborative filtering recommendations using SVD."""
     reader = Reader(rating_scale=(1, 5))
 
     if len(ratings_df) < 10:
@@ -83,7 +91,6 @@ def recommend_books_collaborative(user_id, ratings_df):
 
     all_books = data.build_full_trainset().all_items()
     book_titles = {i: data.build_full_trainset().to_raw_iid(i) for i in data.build_full_trainset().all_items()}
-
 
     recommendations = [
         (book_titles[book], model.predict(user_id, book_titles[book]).est)
@@ -100,6 +107,7 @@ def serve():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
+    """Handle file upload and generate recommendations."""
     try:
         file = request.files.get("file")
         if not file:
@@ -114,15 +122,17 @@ def upload_file():
             print(f"Error reading file: {e}")
             return jsonify({"error": f"Error reading file: {e}"}), 400
 
+        # Fetch book details
         book_data = []
         for book in df["book_title"]:
             details = get_book_data(book)
             if details:
                 book_data.append(details)
-            time.sleep(1) 
+            time.sleep(1)
 
         books_df = pd.DataFrame(book_data)
 
+        # Fetch additional books by genre
         extra_books = []
         for genre in books_df["genre"].unique():
             params = {
@@ -144,23 +154,28 @@ def upload_file():
                             "summary": volume_info.get("description", "No description available.")
                         })
 
-            time.sleep(1) 
+            time.sleep(1)
 
         extra_books_df = pd.DataFrame(extra_books)
 
+        # Combine all books
         full_books_df = pd.concat([books_df, extra_books_df], ignore_index=True)
 
+        # Hybrid recommendations (Content + Collaborative)
         hybrid_recommendations = set()
         for book in df["book_title"]:
             content_recs = recommend_books_content(full_books_df, book)
             hybrid_recommendations.update([rec[0] for rec in content_recs])
 
-        return jsonify({"message": "File uploaded successfully", "recommendations": list(hybrid_recommendations)})
+        # Remove books already in the uploaded file
+        uploaded_books = set(df["book_title"].tolist())
+        filtered_recommendations = [book for book in hybrid_recommendations if book not in uploaded_books]
+
+        return jsonify({"message": "File uploaded successfully", "recommendations": filtered_recommendations})
     
     except Exception as e:
         print(f"Internal server error: {e}")
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
-    
 if __name__ == "__main__":
     app.run(debug=True)
